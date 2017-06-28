@@ -1,0 +1,9 @@
+# objects
+*.o
+
+# output
+configfileform
+
+# environment
+/config.mk
+/tags
