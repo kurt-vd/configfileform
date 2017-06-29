@@ -98,6 +98,9 @@ static void append_line(const char *line)
 			return;
 		}
 		for (++line; *line == ' '; ++line);
+		/* insert newline on empty lines */
+		if (!*line)
+			line = "<br />\n";
 		len = strlen(line);
 		if (buflen + 1 + len + 1 > bufsize) {
 			bufsize = (buflen + 1 + len + 1 + 1024) & ~1023;
@@ -122,7 +125,7 @@ static void append_line(const char *line)
 			printf("%s=%s\n", line, newvalue ?: value);
 			return;
 		}
-		printf("<p>%s\n<br />%s<input type='input' name='%s' value='%s'></p>\n",
+		printf("<p>%s\n<br />%s&nbsp;<input type='input' name='%s' value='%s'></p>\n",
 				buf, line, line, html_encode(value));
 		/* flush */
 		buflen = 0;
