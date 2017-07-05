@@ -34,6 +34,7 @@ static const char help_msg[] =
 	" -v, --verbose		Be more verbose\n"
 	" -o, --out=FILE	Write output to FILE\n"
 	" -r, --request=REQURI	Decode REQURI and apply to input\n"
+	" -p, --print=NAME	Print NAME from input\n"
 	;
 
 #ifdef _GNU_SOURCE
@@ -44,6 +45,7 @@ static struct option long_opts[] = {
 
 	{ "out", required_argument, NULL, 'o', },
 	{ "request", required_argument, NULL, 'r', },
+	{ "print", required_argument, NULL, 'p', },
 
 	{ },
 };
@@ -51,12 +53,13 @@ static struct option long_opts[] = {
 #define getopt_long(argc, argv, optstring, longopts, longindex) \
 	getopt((argc), (argv), (optstring))
 #endif
-static const char optstring[] = "Vv?o:r:";
+static const char optstring[] = "Vv?o:r:p:";
 
 static int verbose;
 static char *buf;
 static int buflen, bufsize;
 static char *request;
+static char *printname;
 
 static const char *html_encode(const char *str)
 {
@@ -212,6 +215,9 @@ int main(int argc, char *argv[])
 	case 'r':
 		request = optarg;
 		break;
+	case 'p':
+		printname = optarg;
+		break;
 
 	default:
 		fprintf(stderr, "unknown option '%c'\n", opt);
@@ -246,6 +252,9 @@ int main(int argc, char *argv[])
 			if (verbose >= 2)
 				fprintf(stderr, "cgi: %s=%s\n", key, value);
 			setenv(key, value ?: "", 1);
+		}
+		if (printname) {
+			printf("%s", getenv(printname) ?: "");
 		}
 	}
 
