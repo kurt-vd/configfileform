@@ -77,6 +77,60 @@ static int buflen, bufsize;
 static char *request;
 static char *printname;
 
+static char *shell_decode(char *str)
+{
+	char *dst, *saved_str;
+	int esc = 0;
+
+	for (saved_str = dst = str; *str; ++str) {
+		if (*str == '\\' && !esc) {
+			esc = 1;
+		} else {
+			esc = 0;
+			*dst++ = *str;
+		}
+	}
+	*dst = 0;
+	if (*saved_str == '\'' && *(dst-1) == '\'') {
+		/* remove quotes */
+		*(dst-1) = 0;
+		++saved_str;
+	}
+	return saved_str;
+}
+
+static const char *shell_encode(const char *str)
+{
+	static char *enc;
+	static int encsize;
+	int len, special;
+	char *dst;
+
+	len = strlen(str ?: "");
+	if (len*2+2+1 > encsize) {
+		encsize = len*2+2+1;
+		enc = realloc(enc, encsize);
+	}
+	special = 0;
+	for (dst = enc, *dst++ = '\''; *str; ++str) {
+		static const char escchars[] = "\"'";
+		static const char specialchars[] = " \\\"'&<>";
+
+		if (strchr(specialchars, *str))
+			special = 1;
+		if (strchr(escchars, *str))
+			*dst++ = '\\';
+		*dst++ = *str;
+	}
+	if (special) {
+		*dst++ = '\'';
+		*dst = 0;
+		return enc;
+	}
+	*dst = 0;
+	return enc+1;
+}
+
 static const char *html_encode(const char *str)
 {
 	static char *enc;
@@ -140,12 +194,12 @@ static void append_line(const char *line)
 			if (verbose)
 				fprintf(stderr, "%s %s=%s\n",
 						newvalue ? "changing" : "writing",
-						line, html_encode(newvalue ?: value));
-			printf("%s=%s\n", line, newvalue ?: value);
+						line, shell_encode(newvalue ?: value));
+			printf("%s=%s\n", line, shell_encode(newvalue ?: value));
 			return;
 		}
 		printf("<p>%s\n<br />%s&nbsp;<input type='input' name='%s' value='%s'></p>\n",
-				buf, line, line, html_encode(value));
+				buf, line, line, html_encode(shell_decode(value)));
 		/* flush */
 		buflen = 0;
 
