@@ -19,7 +19,12 @@ if [ "$REQUEST_METHOD" = "POST" ]; then
 	CGIREQ=`cat`
 	CONFFILE=`../configfileform -v -p conffile -r "$CGIREQ" 2>&1`
 	echo "processing $CONFFILE"
-	if [ -w "$CONFFILE" ]; then
+	CANONCONFFILE=`readlink -f "$CONFFILE"`
+	CANONDIR=`dirname "$CANONCONFFILE"`
+	if [ "$CANONDIR" != /etc/config ]; then
+		echo "$CONFFILE is outside /etc/config"
+
+	elif [ -w "$CONFFILE" ]; then
 		../configfileform -v -r "$CGIREQ" "$CONFFILE" -o "$CONFFILE-$$" 2>&1 && mv "$CONFFILE-$$" "$CONFFILE"
 		rm -f "$CONFFILE-$$" 2> /dev/null
 	else
