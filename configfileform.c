@@ -91,7 +91,7 @@ static char *shell_decode(char *str)
 		}
 	}
 	*dst = 0;
-	if (*saved_str == '\'' && *(dst-1) == '\'') {
+	if (strchr("\"'", *saved_str) && *(dst-1) == *saved_str) {
 		/* remove quotes */
 		*(dst-1) = 0;
 		++saved_str;
