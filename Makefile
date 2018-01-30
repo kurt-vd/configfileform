@@ -5,7 +5,6 @@ PREFIX	= /usr/local
 
 CFLAGS	= -Wall
 CPPFLAGS= -D_GNU_SOURCE
-LDLIBS	= -lmosquitto
 INSTOPTS= -s
 
 VERSION := $(shell git describe --tags --always)
